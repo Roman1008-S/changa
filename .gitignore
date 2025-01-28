@@ -1,0 +1,59 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+node_modules/
+build/
+dist/
+coverage/
+temp/
+*.tmp
+
+# Frontend-specific (React)
+frontend/node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/.env.test.local
+frontend/.cache/
+frontend/coverage/
+frontend/.next/
+frontend/out/
+
+# Backend-specific
+backend/node_modules/
+backend/.env
+backend/.env.local
+backend/.env.development.local
+backend/.env.production.local
+backend/.env.test.local
+backend/coverage/
+backend/dist/
+backend/temp/
+backend/logs/
+backend/*.log
+backend/debug/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.iml
+
+# OS-specific files
+Thumbs.db
+.DS_Store
+
+# Package-lock and yarn-lock files (optional; include if not needed)
+yarn.lock
+package-lock.json
