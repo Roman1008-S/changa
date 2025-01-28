@@ -1,0 +1,32 @@
+export const facilitators = [
+  {
+    id: "01",
+    name: "Bryan Arnold",
+    specialization: "Facilitator",
+    avgRating: 4.5,
+    totalRating: 210,
+    photo: "assets/image/Facilitators.png",
+    totalStudents: 1800,
+    hospital: "The Sacred Mushroom",
+  },
+  {
+    id: "02",
+    name: "Bryan Arnold",
+    specialization: "Integration",
+    avgRating: 4.6,
+    totalRating: 185,
+    photo: "assets/image/Facilitators.png",
+    totalStudents: 1300,
+    hospital: "The Sacred Mushroom",
+  },
+  {
+    id: "03",
+    name: "Bryan Arnold",
+    specialization: "Service Center",
+    avgRating: 4.3,
+    totalRating: 300,
+    photo: "assets/image/Facilitators.png",
+    totalStudents: 2200,
+    hospital: "The Sacred Mushroom",
+  },
+];
