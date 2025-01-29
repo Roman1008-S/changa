@@ -1,133 +1,151 @@
 import bcrypt from "bcryptjs";
-
-import User from "../model/user.js";
+import Student from "../model/student.js";
 import Facilitator from "../model/facilitator.js";
 import Token from "../services/token.js";
 
-const generateToken = (user) => {
-    const { id, email, role } = user;
-    const accessToken = Token.generate({ id, email, role });
-    return accessToken;
+// Utility function: Find user by email based on role
+const findUserByEmail = async (email) => {
+    const student = await Student.findOne({ email });
+    const facilitator = await Facilitator.findOne({ email });
+    return student || facilitator;
 };
 
+const setRole = async (email) => {
+    const student = await Student.findOne({ email });
+    if (student)
+        return "student";
+    else
+        return "facilitator"
+};
+
+// Utility function: Generate token
+const generateToken = (user, role) => {
+    const { id, email } = user;
+    return Token.generate({ id, email, role });
+};
+
+// Register Controller
 export const register = async (req, res) => {
-    const { email, password, name, role, photo, gender } = req.body;
+    const { email, password, name, role, gender } = req.body;
+
     try {
-        let user = null;
-        if (role === "student") {
-            user = await User.findOne({ email });
-        } else if (role === "facilitator") {
-            user = await Facilitator.findOne({ email });
+        // Check if user already exists
+        const existingUser =
+            role === "student"
+                ? await Student.findOne({ email })
+                : await Facilitator.findOne({ email });
+
+        if (existingUser) {
+            return res.status(400).json({ status: "failed", message: "User already exists" });
         }
 
-        if (user) {
-            return res.send({ status: "failed", message: "User already exist" })
-        }
-
+        // Hash the password
         const salt = await bcrypt.genSalt(10);
-        const hashPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        if (role === "student") {
-            user = new User({
-                name,
-                email,
-                password: hashPassword,
-                photo,
-                gender,
-                role,
-            });
-        }
+        // Create a new user based on role
+        const user =
+            role === "student"
+                ? new Student({ name, email, password: hashedPassword, gender })
+                : new Facilitator({ name, email, password: hashedPassword, gender });
 
-        if (role === "facilitator") {
-            user = new Facilitator({
-                name,
-                email,
-                password: hashPassword,
-                photo,
-                gender,
-                role,
-            });
-        }
         await user.save();
-        return res.send({
+
+        return res.status(201).json({
             status: "success",
-            message: "User successfully created"
-        })
+            message: "User successfully created",
+        });
     } catch (error) {
-        console.log(error);
-        return res.send({
+        console.error("Error during registration:", error);
+        return res.status(500).json({
             status: "failed",
-            message: "You Got Error, Try Again"
-        })
+            message: "An error occurred during registration. Please try again.",
+        });
     }
 };
 
+// Login Controller
 export const login = async (req, res) => {
-    const { email } = req.body;
+    const { email, password } = req.body;
+
     try {
-        let user = null;
-        const student = await User.findOne({ email });
-        const facilitator = await Facilitator.findOne({ email });
-        if (student) {
-            user = student
-        } else if (facilitator) {
-            user = facilitator
+        // Find user by email
+        const user = await findUserByEmail(email);
+        const role = await setRole(email);
+        if (!user) {
+            return res.status(404).json({ status: "failed", message: "User not found" });
         }
+
+        // Compare password
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
+        if (!isPasswordMatch) {
+            return res.status(401).json({ status: "failed", message: "Incorrect password" });
+        }
+
+        // Generate token
+        const accessToken = generateToken(user, role);
+
+        // Exclude password from the response
+        const { password: _, ...userData } = user._doc;
+
+        return res.status(200).json({
+            status: "success",
+            message: "Successfully logged in",
+            token: accessToken,
+            user: userData,
+            role: role
+        });
+    } catch (error) {
+        console.error("Error during login:", error);
+        return res.status(500).json({
+            status: "failed",
+            message: "An error occurred during login. Please try again.",
+        });
+    }
+};
+
+// Load User Controller
+export const loadUser = async (req, res) => {
+    let refresh_User = req.user;
+    try {
+        const user =
+            refresh_User.role === "facilitator"
+                ? await Facilitator.findById(refresh_User.id)
+                : await Student.findById(refresh_User.id);
 
         if (!user) {
-            return res.send({ status: "failed", message: "User Not Found" })
+            return res.status(404).json({ status: "failed", message: "User not found" });
         }
 
-        const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
-        if (!isPasswordMatch) {
-            return res.send({ status: "failed", message: "The password is incorrect" })
-        }
-        const accessToken = await generateToken(user);
-        const { password, ...rest } = user._doc
+        // Generate a new token
+        const newToken = generateToken(user);
 
-        return res.send({
+        // Exclude password from the response
+        const { password: _, ...userData } = user._doc;
+
+        return res.status(200).json({
             status: "success",
-            message: "Successfully Login",
-            token: accessToken,
-            user: { ...rest },
-        })
+            message: "User loaded successfully",
+            token: newToken,
+            user: userData,
+            role: refresh_User.role
+        });
     } catch (error) {
-        console.log(error);
-        return res.send({ status: "failed", message: "Failed To Login" })
+        console.error("Error during loading user:", error);
+        return res.status(500).json({ status: "failed", message: "Failed to load user" });
     }
 };
 
-
-
-export const loadUser = async (req, res) => {
-    const token = req.header('Authorization').replace('Bearer ', '');
+// Logout Controller
+export const logout = async (req, res) => {
     try {
-        const data = Token.validate(token);
-        if (!data || typeof data === 'string' || !data.id) {
-            return res.send({ status: "failed", message: "The refresh token is invalid." })
-        }
-        let found = null
-        if (data.role === "facilitator") {
-            found = await Facilitator.findById(data.id);
-        } else {
-            found = await User.findById(data.id);
-        }
-
-        if (!found) {
-            return res.send({ status: "failed", message: "User not found" })
-        }
-        const accessToken = generateToken(found);
-
-        const { password, ...rest } = found._doc
-
-        return res.send({
-            status: "success",
-            message: "Successfully Login",
-            token: accessToken,
-            user: { ...rest },
-        })
-    } catch (e) {
-        console.log(error);
-        return res.send({ status: "failed" })
+        if (req.user)
+            return res.status(200).json({ status: "success", message: "Successfully logged out" });
+    } catch (error) {
+        console.error("Error during logout:", error);
+        return res.status(500).json({
+            status: "failed",
+            message: "An error occurred during logout. Please try again.",
+        });
     }
-}
+};

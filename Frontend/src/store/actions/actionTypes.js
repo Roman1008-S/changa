@@ -3,4 +3,5 @@ export const ActionTypes = {
     LOGIN_FAILED: "LOGIN_FAILED",
     USER_LOADED: "USER_LOADED",
     AUTH_ERROR: "AUTH_ERROR",
+    LOGOUT: "LOGOUT"
 };

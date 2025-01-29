@@ -1,15 +1,39 @@
 import { facilitators } from '../../constant/data/facilitators.js'
 import Card from './card.jsx'
-
+import { Pagination } from 'swiper'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import 'swiper/css'
+import 'swiper/css/pagination'
 
 function FacilitatorList() {
     return (
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 lg:gap-[30px] mt-[30px] lg:mt-[55px]'>
-            {facilitators.map(facil => {
-                return (
-                    <Card key={facil.id} facilitator={facil} />
-                )
-            })}
+        <div className='mt-[30px] lg:mt-[55px]'>
+            <Swiper modules={[Pagination]} spaceBetween={30} slidesPerView={1} pagination={{ clickable: true }}
+                breakpoints={{
+                    640: {
+                        slidesPerView: 1,
+                        spaceBetween: 0,
+                    },
+                    768: {
+                        slidesPerView: 2,
+                        spaceBetween: 20,
+                    },
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 30,
+                    },
+                }}
+            >
+                {facilitators.map(facil => {
+                    return (
+                        <SwiperSlide key={facil.id}  className='mb-[50px]'>
+                            <div className='py-[30px] px-5 rounded-3'>
+                                <Card facilitator={facil} />
+                            </div>
+                        </SwiperSlide>
+                    )
+                })}
+            </Swiper>
         </div>
     )
 }

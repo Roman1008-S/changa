@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { BsArrowRight } from 'react-icons/bs'
 import { Link } from 'react-router-dom'
 
@@ -17,7 +16,7 @@ function Card({ item, index }) {
 
             <div className='flex items-center justify-between mt-[30px]'>
                 <Link
-                    to='/doctors'
+                    to='/facilitator'
                     className='w-[44px] h-[44px] rounded-full border border-solid border-[#181A1E]  flex items-center group
                     hover:bg-primaryColor hover:border-none justify-center'>
                     <BsArrowRight className='group-hover:text-white w-6 h-5' />

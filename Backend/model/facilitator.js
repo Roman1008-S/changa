@@ -1,58 +1,72 @@
 import mongoose from "mongoose";
 
-const FacilitatorSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        unique: true
+const facilitatorSchema = new mongoose.Schema(
+    {
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        password: {
+            type: String,
+            required: true,
+        },
+        name: {
+            type: String,
+            required: true,
+        },
+        phone: {
+            type: Number,
+        },
+        f_name: {
+            type: String,
+        },
+        l_name: {
+            type: String,
+        },
+        f_url: {
+            type: String,
+        },
+        t_url: {
+            type: String,
+        },
+        l_url: {
+            type: String,
+        },
+        i_url: {
+            type: String,
+        },
+        lat: {
+            type: Number,
+        },
+        lng: {
+            type: Number,
+        },
+        photo: {
+            type: String,
+        },
+        psilocybin: {
+            type: String,
+        },
+        reviews: [
+            {
+                type: mongoose.Types.ObjectId,
+                ref: "Review",
+            },
+        ],
+        averageRating: {
+            type: Number,
+            default: 0,
+        },
+        totalRating: {
+            type: Number,
+            default: 0,
+        },
+        gender: { type: String, enum: ["male", "female"] },
     },
-    password: {
-        type: String,
-        required: true
-    },
-    name: {
-        type: String,
-        required: true
-    },
-    phone: {
-        type: Number
-    },
-    photo: {
-        type: String
-    },
-    ticketPrice: {
-        type: Number
-    },
-    role: {
-        type: String,
-    },
+    {
+        timestamps: true, // Automatically adds createdAt and updatedAt fields
+    }
+);
 
-    specialization: { type: String },
-    qualifications: {
-        type: Array,
-    },
-
-    experiences: {
-        type: Array,
-    },
-
-    bio: { type: String, maxLength: 50 },
-    about: { type: String },
-    timeSlots: { type: Array },
-    reviews: [{ type: mongoose.Types.ObjectId, ref: "Review" }],
-    averageRating: {
-        type: Number,
-        default: 0,
-    },
-    totalRating: {
-        type: Number,
-        default: 0,
-    },
-    isApproved: {
-        type: String,
-        enum: ["pending", "approved", "cancelled"],
-        default: "pending",
-    },
-});
-
-export default mongoose.model("Facilitator", FacilitatorSchema);
+export default mongoose.model("Facilitator", facilitatorSchema);

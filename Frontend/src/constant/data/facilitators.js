@@ -29,4 +29,14 @@ export const facilitators = [
     totalStudents: 2200,
     hospital: "The Sacred Mushroom",
   },
+  {
+    id: "04",
+    name: "Bryan Arnold",
+    specialization: "Service Center",
+    avgRating: 4.3,
+    totalRating: 300,
+    photo: "assets/image/Facilitators.png",
+    totalStudents: 2200,
+    hospital: "The Sacred Mushroom",
+  },
 ];

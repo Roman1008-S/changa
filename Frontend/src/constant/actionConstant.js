@@ -1,14 +1,19 @@
-const baseURL = "http://localhost:3000"
+const baseURL = "http://localhost:3000";
 
-const Auth ={
-    Register:"/api/auth/register",
-    Login:"/api/auth/login",
-    LoadUser:"/api/auth/user/me"
+const authEndpoints = {
+    register: "/api/auth/register",
+    login: "/api/auth/login",
+    loadUser: "/api/auth/user/me",
+    logout: "/api/auth/user/logout",
+
+};
+
+const userEndpoints = {
+    profileUpdate: "/api/user/profileUpdate",
 }
 
-const Action_Constant ={
+export const actionConstants = {
     baseURL,
-    Auth
-}
-
-export default Action_Constant
+    authEndpoints,
+    userEndpoints
+};

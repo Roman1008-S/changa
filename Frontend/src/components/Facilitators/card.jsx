@@ -1,8 +1,10 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 import { BsArrowRight } from 'react-icons/bs'
+import { useNavigate } from 'react-router-dom';
 
-const Card = ({facilitator}) => {
+const Card = ({ facilitator }) => {
+    const navigate = useNavigate();
+
     const { name, specialization, avgRating, totalRating, photo, totalStudents, hospital } = facilitator
     return (
         <div className='p-3 lg:p-5'>
@@ -38,10 +40,14 @@ const Card = ({facilitator}) => {
                     </p>
                 </div>
 
-                <Link to='/doctors' className='w-[44px] h-[44px] rounded-full border border-solid border-[#181A1E]
-                   flex items-center group hover:bg-primaryColor hover:border-none justify-center'>
-                    <BsArrowRight className='group-hover:text-white w-6 h-5' />
-                </Link>
+                <button className='w-[44px] h-[44px] rounded-full border border-solid border-[#181A1E]
+                   flex items-center group hover:bg-[#dcf5f7] hover:border-none justify-center'
+                    onClick={() => {
+                        navigate(`/facilitators/:${facilitator.id}`)
+                    }}
+                >
+                    <BsArrowRight className='group-hover:text-[#181A1E] w-6 h-5' />
+                </button>
 
             </div>
 

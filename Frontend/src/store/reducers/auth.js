@@ -1,12 +1,15 @@
 import { ActionTypes } from "../actions/actionTypes";
 
-let pre_Token = localStorage.getItem("token");
-let token = pre_Token ? JSON.parse(pre_Token) : null;
+// Retrieve token from local storage
+const pre_Token = localStorage.getItem("jwtToken");
+const token = pre_Token ? JSON.parse(pre_Token) : null;
 
+// Initial state of the auth reducer
 const initialState = {
   token: token,
-  isAuth: false,
-  userInfo: [],
+  isAuth: !!token, // Set `isAuth` to true if a token exists
+  userInfo: null,
+  role: ""
 };
 
 export const authReducer = (state = initialState, action) => {
@@ -14,22 +17,35 @@ export const authReducer = (state = initialState, action) => {
 
   switch (type) {
     case ActionTypes.LOGIN_SUCCESS:
-      localStorage.setItem('jwtToken', payload.token);
+      // Save token in local storage
+      localStorage.setItem("jwtToken", JSON.stringify(payload.token));
       return {
         ...state,
-        ...payload,
+        token: payload.token,
         isAuth: true,
-        userInfo: payload.user
+        userInfo: payload.user,
+        role: payload.role
       };
+
     case ActionTypes.USER_LOADED:
       return {
         ...state,
-        ...payload,
         isAuth: true,
-        userInfo: payload.user
+        userInfo: payload.user,
+        role: payload.role
       };
+
     case ActionTypes.LOGIN_FAILED:
-      return { ...state, isAuth: false };
+    case ActionTypes.LOGOUT:
+      // Clear token and user data on logout or login failure
+      localStorage.removeItem("jwtToken");
+      return {
+        ...state,
+        token: null,
+        isAuth: false,
+        userInfo: null,
+      };
+
     default:
       return state;
   }

@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRouter from "./route/auth.js";
+import userRouter from "./route/user.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(cors(corsOptions));
 
 // Routes
 app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 
 // Mongoose connection
 mongoose.set("strictQuery", false); // Suppress strict query warnings

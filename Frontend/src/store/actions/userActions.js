@@ -1,49 +1,76 @@
 import { ActionTypes } from "./actionTypes";
-import Action_Constant from "../../constant/actionConstant";
+import { actionConstants } from "../../constant/actionConstant";
 import setAuthHeaders from "../../utils/setAuth";
-import { setUser, isLoggedIn } from "../../utils/auth"
+import { setUser, isLoggedIn, removeUser } from "../../utils/auth";
 
-export const login = (user) => async (dispatch) => {
+// Helper function for API calls
+const apiCall = async (url, method, body = null, headers = {}) => {
     try {
-        const url = Action_Constant.baseURL + Action_Constant.Auth.Login;
         const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(user),
+            method,
+            headers: { "Content-Type": "application/json", ...headers },
+            body: body ? JSON.stringify(body) : null,
         });
-        const responseData = await response.json();
-
-        if (responseData.status === "success") {
-            const { user } = responseData;
-            user && setUser(user);
-            dispatch({ type: ActionTypes.LOGIN_SUCCESS, payload: responseData });
-        }
-        if (responseData.status === "failed") {
-            dispatch({ type: ActionTypes.LOGIN_FAILED });
-        }
-
+        return await response.json();
     } catch (error) {
-        dispatch({ type: ActionTypes.LOGIN_FAILED });
+        console.error("API call failed:", error);
+        throw error;
     }
 };
 
-export const loadUser = () => async dispatch => {
-    if (!isLoggedIn()) return;
+// Login action
+export const login = (user) => async (dispatch) => {
     try {
-        const url = Action_Constant.baseURL + Action_Constant.Auth.LoadUser;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: setAuthHeaders()
-        });
-        const responseData = await response.json();
+        const url = `${actionConstants.baseURL}${actionConstants.authEndpoints.login}`;
+        const responseData = await apiCall(url, "POST", user);
+
         if (responseData.status === "success") {
             const { user } = responseData;
-            user && setUser(user);
-            dispatch({ type: ActionTypes.USER_LOADED, payload: responseData });
+            if (user) setUser(user); // Store user in local storage
+            dispatch({ type: ActionTypes.LOGIN_SUCCESS, payload: responseData });
         } else {
-            dispatch({ type: ActionTypes.AUTH_ERROR });
+            dispatch({ type: ActionTypes.LOGIN_FAILED, payload: responseData.message });
         }
     } catch (error) {
-        dispatch({ type: ActionTypes.AUTH_ERROR });
+        dispatch({ type: ActionTypes.LOGIN_FAILED, payload: "Login failed. Please try again." });
+    }
+};
+
+// Load user action
+export const loadUser = () => async (dispatch) => {
+    if (!isLoggedIn()) return;
+
+    try {
+        const url = `${actionConstants.baseURL}${actionConstants.authEndpoints.loadUser}`;
+        const responseData = await apiCall(url, "GET", null, setAuthHeaders());
+
+        if (responseData.status === "success") {
+            const { user } = responseData;
+            if (user) setUser(user); // Update user in local storage
+            dispatch({ type: ActionTypes.USER_LOADED, payload: responseData });
+        } else {
+            dispatch({ type: ActionTypes.AUTH_ERROR, payload: responseData.message });
+        }
+    } catch (error) {
+        dispatch({ type: ActionTypes.AUTH_ERROR, payload: "Failed to load user. Please try again." });
+    }
+};
+
+// Logout action
+export const logout = () => async (dispatch) => {
+    try {
+        const token = localStorage.getItem("jwtToken");
+        const url = `${actionConstants.baseURL}${actionConstants.authEndpoints.logout}`;
+
+        const responseData = await apiCall(url, "POST", null, {
+            Authorization: `Bearer ${token}`,
+        });
+
+        if (responseData.status === "success") {
+            removeUser(); // Clear user data from local storage
+            dispatch({ type: ActionTypes.LOGOUT });
+        }
+    } catch (error) {
+        console.error("Logout failed:", error);
     }
 };
